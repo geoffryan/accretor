@@ -12,11 +12,11 @@ SRCDIRS := $(shell find . -name '*.$(SRCEXT)' -exec dirname {} \; | uniq)
 OBJS    := $(patsubst %.$(SRCEXT),$(OBJDIR)/%.o,$(SRCS))
 
 DEBUG    = -g
-INCLUDES = -I$(H55)/include
+INCLUDES = 
 CFLAGS   = -O3 -c $(DEBUG) $(INCLUDES)
 LDFLAGS  = -lm
 
-CC       = mpicc
+CC       = gcc
 
 .PHONY: all clean distclean
 
