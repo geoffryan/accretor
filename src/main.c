@@ -6,15 +6,18 @@
 
 int main(int argc, char *argv[])
 {
-    int i, nq, nc, N;
+    int i, nq, nc, N, stop;
     double R1, R2;
     double *prim;
 
-    N = 128;
+    N = 10000;
+    stop = -1;
 
     printf("Setting up...\n");
-    hydro_setup(0);
-    step_setup(2);
+    hydro_setup(2);
+    step_setup(1);
+    eos_setup(0);
+    cool_setup(1);
     
     printf("Initializing...\n");
     nq = numq();
@@ -31,7 +34,7 @@ int main(int argc, char *argv[])
     fclose(f);
 
     printf("Evolving...\n");
-    evolve(prim, R1, R2, N);
+    evolve(prim, R1, R2, N, stop);
     
     printf("Cleaning...\n");
     free(prim);

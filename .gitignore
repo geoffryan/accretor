@@ -1,3 +1,5 @@
 .DS_store
 bin/accretor
 *.o
+notebooks/
+out*

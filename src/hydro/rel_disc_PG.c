@@ -3,17 +3,20 @@
 #include "hydro.h"
 #include "../eos/eos.h"
 
-int numq_rel_disc()
+// Disc in the Schwarzschild metric.  Approximating the Popham-Gammie 98
+// setup.
+
+int numq_rel_disc_PG()
 {
     return 6;
 }
 
-int numc_rel_disc()
+int numc_rel_disc_PG()
 {
-    return 6;
+    return 4;
 }
 
-void initial_rel_disc(double *prim, double *R1, double *R2)
+void initial_rel_disc_PG(double *prim, double *R1, double *R2)
 {
     *R1 = 1.0;
     *R2 = 3.0;
@@ -26,7 +29,7 @@ void initial_rel_disc(double *prim, double *R1, double *R2)
     prim[DUP] = -0.0015;
 }
 
-void flow_grad_rel_disc(double *prim, double r, double *dprim)
+void flow_grad_rel_disc_PG(double *prim, double r, double *dprim)
 {
 
     double drho, dttt, dur, dup, ddur, ddup;

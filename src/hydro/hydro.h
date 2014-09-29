@@ -7,8 +7,10 @@
 #define UPP 3
 #define DUR 4
 #define DUP 5
+#define ACC 4
+#define LLL 5
 
-static double M = 1.0;
+static double M = 1.0e-6;
 static double alpha = 0.01;
 
 int (*numq)();
@@ -26,5 +28,9 @@ int numq_rel_disc();
 int numc_rel_disc();
 void initial_rel_disc(double *prim, double *R1, double *R2);
 void flow_grad_rel_disc(double *prim, double x, double *dprim);
+int numq_newt_disc_SS();
+int numc_newt_disc_SS();
+void initial_newt_disc_SS(double *prim, double *R1, double *R2);
+void flow_grad_newt_disc_SS(double *prim, double x, double *dprim);
 
 #endif

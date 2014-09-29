@@ -3,8 +3,24 @@
 #include "step.h"
 #include "hydro/hydro.h"
 
+/*
+This file includes all of the integration algorithms for solving
+a system of ODEs.  The current integrator is referred to by 
+the "step" function pointer.  All integration algorithms have the
+signature "void (*step)(double *prim, double r, double *dr)"
+defined in step.h.  'prim' contains the current values of the 
+dependent variables at location 'r', 'dr' refers to the desired step
+size.  Adaptive integrators may alter the value of dr.  In calling
+'step', the values in 'prim' will be updated to the values at r+dr.
+*/
+
 void step_setup(int choice)
 {
+    /*
+    Intializes the 'step' function pointer to refer to the desired
+    integration scheme.
+    */
+    
     if(choice == 0)
     {
         step = &forward_euler;
@@ -17,18 +33,31 @@ void step_setup(int choice)
     {
         step = &forward_rk4;
     }
+    else if(choice == 3)
+    {
+        step = &backward_euler;
+    }
 }
 
-void evolve(double *prim, double R1, double R2, int n)
+void evolve(double *prim, double R1, double R2, int n, int stop)
 {
-    int i, nc, nq;
+    /*
+    Integrates prim from R1 to R2 in n (approximately) steps.
+    */
+
+    int i, iter, nc, nq;
     double r = R1;
     double dr = (R2-R1)/n;
 
     nc = numc();
     nq = numq();
 
-    while((R1<R2 && r<R2) || (R2<R1 && r>R2))
+    if(stop < 0)
+        iter = -10;
+    else
+        iter = 0;
+
+    while(((R1<R2 && r<R2) || (R2<R1 && r>R2)) && iter < stop)
     {
         printf("r: %.12g, dr: %.12g\n", r, dr);
 
@@ -41,11 +70,19 @@ void evolve(double *prim, double R1, double R2, int n)
             fprintf(f, " %.12g", prim[i]);
         fprintf(f, "\n");
         fclose(f);
+
+        if(stop >= 0)
+            iter++;
     }
 }
 
 void substep_forward(double *prim1, double *prim2, double r, double dr)
 {
+    /*
+    Primitive explicit first-order step.  Uses prim1 as input, saves result
+    in prim2. Calculates derivative at r, and takes step dr.
+    */
+
     int nc = numc();
     int nq = numq();
     int i;
@@ -53,6 +90,10 @@ void substep_forward(double *prim1, double *prim2, double r, double dr)
     double *dprim = (double *) malloc(nc * sizeof(double));
 
     flow_grad(prim1, r, dprim);
+//    for(i=0; i<nc; i++)
+//        printf("  %.12g", dprim[i]);
+//    printf("\n");
+
     for(i=0; i<nc; i++)
         prim2[i] = prim1[i] + dr*dprim[i];
     for(i=nc; i<nq; i++)
@@ -61,13 +102,92 @@ void substep_forward(double *prim1, double *prim2, double r, double dr)
     free(dprim);
 }
 
+void substep_backward(double *prim1, double *prim2, double r, double dr)
+{
+    /*
+    Primitive implicit first-order step.  Uses prim1 as input, saves result
+    in prim2. Calculates derivative at r+dr iteratively, and takes step dr.
+    */
+
+    int max_count = 1000;
+    double tolerance = 1.0e-13;
+    int nc = numc();
+    int nq = numq();
+    int i, j;
+
+    double err = 0;
+    double norm = 0;
+    double *dprim = (double *) malloc(nc * sizeof(double));
+    double *old = (double *) malloc(nq * sizeof(double));
+    double *new = (double *) malloc(nq * sizeof(double));
+
+    flow_grad(prim1, r+dr, dprim);
+    for(i=0; i<nc; i++)
+    {    
+        old[i] = prim1[i];
+        new[i] = prim1[i] + dr*dprim[i];
+        err += (new[i]-old[i]) * (new[i]-old[i]);
+        norm += old[i]*old[i];
+    }
+    for(i=nc; i<nq; i++)
+    {
+        old[i] = prim1[i];
+        new[i] = prim1[i];
+    }
+
+    j = 0;
+    while( err > norm * tolerance && j < max_count)
+    {
+        norm = 0;
+        err = 0;
+        for(i=0; i<nc; i++)
+        {
+            old[i] = new[i];
+            norm += old[i]*old[i];
+        }
+        flow_grad(old, r+dr, dprim);
+        for(i=0; i<nc; i++)
+        {
+            new[i] = prim1[i] + dr*dprim[i];
+            err += (new[i]-old[i])*(new[i]-old[i]);
+        }
+        j++;
+    }
+
+    for(i=0; i<nq; i++)
+        prim2[i] = new[i];
+
+    printf("   Used %d iterations.\n", j);
+
+    free(dprim);
+    free(old);
+    free(new);
+}
+
 void forward_euler(double *prim, double r, double *dr)
 {
+    /*
+    First order explicit forward step.  
+    */
+
     substep_forward(prim, prim, r, *dr);
+}
+
+void backward_euler(double *prim, double r, double *dr)
+{
+    /*
+    First order implicit step.  
+    */
+
+    substep_backward(prim, prim, r, *dr);
 }
 
 void forward_rk2(double *prim, double r, double *dr)
 {
+    /*
+    Second order explicit Runge-Kutta step.
+    */
+
     int i;
     int nq = numq();
     int nc = numc();
@@ -86,6 +206,10 @@ void forward_rk2(double *prim, double r, double *dr)
 
 void forward_rk4(double *prim, double r, double *dr)
 {
+    /*
+    Fourth order explicit Runge-Kutta step.
+    */
+
     int i;
     int nq = numq();
     int nc = numc();
