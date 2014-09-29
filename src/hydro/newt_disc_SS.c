@@ -18,21 +18,26 @@ int numc_newt_disc_SS()
 void initial_newt_disc_SS(double *prim, double *R1, double *R2)
 {
     double r1 = 3.0;
-    double r2 = 2.0;
+    double r2 = 1.0;
     double Mdot = 1.0e-6;
-    double rho = 1.0;
     double risco = 1.0e-6;
+    double rho, T, vr, vp;
+
+    rho = 1.0;
+    T = sqrt(M/(r1*r1*r1)) * Mdot/(3*M_PI*alpha*rho);
+    vr = -Mdot/(2*M_PI*r1*rho);
+    vp = sqrt(M/(r1*r1*r1));
 
     *R1 = r1;
     *R2 = r2;
 
     prim[RHO] = rho;
-    prim[TTT] = sqrt(M/r1*r1*r1) * Mdot/(3*M_PI*alpha*rho);
-    prim[URR] = -Mdot/(2*M_PI*r1*rho);
-    prim[UPP] = sqrt(M/(r1*r1*r1));
+    prim[TTT] = T;
+    prim[URR] = vr;
+    prim[UPP] = vp;
     prim[ACC] = Mdot;
     //prim[LLL] = risco*risco*Mdot/(2*M_PI)*sqrt(M/(risco*risco*risco));
-    prim[LLL] = 0.0;
+    prim[LLL] = r1*r1*r1*(vr*vp + 1.5*alpha*rho*T*sqrt(r1*r1*r1/M)*vp/r1);
 }
 
 void flow_grad_newt_disc_SS(double *prim, double r, double *dprim)
@@ -79,7 +84,7 @@ void flow_grad_newt_disc_SS(double *prim, double r, double *dprim)
         + (v*v-dPPPdRHO)*(0.5*r*r*nu*dom*dom-qdot/rho)/v;
     dT /= dEPSdTTT * D;
 
-    printf("        %.10lg %.10lg %.10lg %.10lg\n", drho, dT, dv, dom);
+ //    printf("        %.10lg %.10lg %.10lg %.10lg\n", drho, dT, dv, dom);
 
     dprim[RHO] = drho;
     dprim[TTT] = dT;

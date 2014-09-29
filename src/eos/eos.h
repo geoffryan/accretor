@@ -21,5 +21,7 @@ double dPdT_ideal(double *prim, double r);
 
 double cool_none(double *prim, double r);
 double cool_thompson(double *prim, double r);
+double cool_visc(double *prim, double r);
+
 
 #endif

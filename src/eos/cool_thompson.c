@@ -1,7 +1,7 @@
 #include "eos.h"
 #include "../hydro/hydro.h"
 
-double q0 = 1.0e20;
+double q0 = 1.0e22;
 
 double cool_thompson(double *prim, double r)
 {

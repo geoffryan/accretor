@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 #include "step.h"
 #include "hydro/hydro.h"
 
@@ -20,7 +21,7 @@ void step_setup(int choice)
     Intializes the 'step' function pointer to refer to the desired
     integration scheme.
     */
-    
+
     if(choice == 0)
     {
         step = &forward_euler;
@@ -109,14 +110,13 @@ void substep_backward(double *prim1, double *prim2, double r, double dr)
     in prim2. Calculates derivative at r+dr iteratively, and takes step dr.
     */
 
-    int max_count = 1000;
-    double tolerance = 1.0e-13;
+    int max_count = 1000000;
+    double tolerance = 1.0e-6;
     int nc = numc();
     int nq = numq();
     int i, j;
 
     double err = 0;
-    double norm = 0;
     double *dprim = (double *) malloc(nc * sizeof(double));
     double *old = (double *) malloc(nq * sizeof(double));
     double *new = (double *) malloc(nq * sizeof(double));
@@ -126,8 +126,7 @@ void substep_backward(double *prim1, double *prim2, double r, double dr)
     {    
         old[i] = prim1[i];
         new[i] = prim1[i] + dr*dprim[i];
-        err += (new[i]-old[i]) * (new[i]-old[i]);
-        norm += old[i]*old[i];
+        err += (new[i]-old[i]) * (new[i]-old[i]) / (old[i]*old[i]);
     }
     for(i=nc; i<nq; i++)
     {
@@ -136,20 +135,16 @@ void substep_backward(double *prim1, double *prim2, double r, double dr)
     }
 
     j = 0;
-    while( err > norm * tolerance && j < max_count)
+    while( err > tolerance && j < max_count)
     {
-        norm = 0;
         err = 0;
         for(i=0; i<nc; i++)
-        {
             old[i] = new[i];
-            norm += old[i]*old[i];
-        }
         flow_grad(old, r+dr, dprim);
         for(i=0; i<nc; i++)
         {
             new[i] = prim1[i] + dr*dprim[i];
-            err += (new[i]-old[i])*(new[i]-old[i]);
+            err += (new[i]-old[i])*(new[i]-old[i]) / (old[i]*old[i]);
         }
         j++;
     }
@@ -178,8 +173,31 @@ void backward_euler(double *prim, double r, double *dr)
     /*
     First order implicit step.  
     */
+    int i, over;
+    int nq = numq();
+    int nc = numc();
+    double *prim2 = (double *) malloc(nq  * sizeof(double));
+    do{
+        substep_backward(prim, prim2, r, *dr);
+        over = 0; 
+        for(i=0; i<nc; i++)
+        {
+            if(fabs(prim2[i]) > 10.0*fabs(prim[i])
+             || fabs(prim2[i]) < 0.1*fabs(prim[i]))
+            {
+                over = 1;
+                *dr *= 0.5;
+                printf("   dr: %.12lg prim:(%.12lg %.12lg %.12lg %.12lg)\n", 
+                    *dr, prim[RHO], prim[TTT], prim[URR], prim[UPP]);
+                break;
+            }
+        }
+    }
+    while(over);
 
-    substep_backward(prim, prim, r, *dr);
+    for(i=0; i<nq; i++)
+        prim[i] = prim2[i];
+    free(prim2);
 }
 
 void forward_rk2(double *prim, double r, double *dr)

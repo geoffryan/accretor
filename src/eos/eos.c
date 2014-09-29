@@ -19,8 +19,12 @@ void cool_setup(int choice)
     {
         cool = &cool_none;
     }
-    if(choice == 1)
+    else if(choice == 1)
     {
         cool = &cool_thompson;
+    }
+    else if(choice == 2)
+    {
+        cool = &cool_visc;
     }
 }

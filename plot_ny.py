@@ -11,8 +11,8 @@ r, rho, T, vr, vp = np.loadtxt(fname, unpack=True, usecols=[0,1,2,3,4])
 
 i = r.argmax()
 R = np.linspace(r.min(), r.max(), 500)
-RHO = rho[i] * np.power(R/r[i], -0.6)
-TTT = T[i] * np.power(R/r[i], -0.9)
+RHO = rho[i] * np.power(R/r[i], -0.5)
+TTT = T[i] * np.power(R/r[i], -1.0)
 URR = vr[i] * np.power(R/r[i], -0.5)
 UPP = vp[i] * np.power(R/r[i], -1.5)
 

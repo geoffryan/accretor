@@ -15,9 +15,9 @@ int main(int argc, char *argv[])
 
     printf("Setting up...\n");
     hydro_setup(2);
-    step_setup(1);
+    step_setup(3);
     eos_setup(0);
-    cool_setup(1);
+    cool_setup(0);
     
     printf("Initializing...\n");
     nq = numq();
