@@ -23,4 +23,11 @@ void hydro_setup(int choice)
         initial = &initial_newt_disc_SS;
         flow_grad = &flow_grad_newt_disc_SS;
     }
+    else if(choice == 3)
+    {
+        numq = &numq_newt_sph;
+        numc = &numc_newt_sph;
+        initial = &initial_newt_sph;
+        flow_grad = &flow_grad_newt_sph;
+    }
 }

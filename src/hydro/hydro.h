@@ -9,6 +9,7 @@
 #define DUP 5
 #define ACC 4
 #define LLL 5
+#define SAC 3
 
 static double M = 1.0e-6;
 static double alpha = 0.01;
@@ -32,5 +33,9 @@ int numq_newt_disc_SS();
 int numc_newt_disc_SS();
 void initial_newt_disc_SS(double *prim, double *R1, double *R2);
 void flow_grad_newt_disc_SS(double *prim, double x, double *dprim);
+int numq_newt_sph();
+int numc_newt_sph();
+void initial_newt_sph(double *prim, double *R1, double *R2);
+void flow_grad_newt_sph(double *prim, double x, double *dprim);
 
 #endif
