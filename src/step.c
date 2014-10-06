@@ -49,6 +49,7 @@ void evolve(double *prim, double R1, double R2, int n, int stop)
     int i, iter, nc, nq;
     double r = R1;
     double dr = (R2-R1)/n;
+    double fac = exp(log(R2/R1)/n) - 1.0;
 
     nc = numc();
     nq = numq();
@@ -60,6 +61,7 @@ void evolve(double *prim, double R1, double R2, int n, int stop)
 
     while(((R1<R2 && r<R2) || (R2<R1 && r>R2)) && iter < stop)
     {
+        dr = fac*r;
         printf("r: %.12g, dr: %.12g\n", r, dr);
 
         step(prim, r, &dr);
@@ -67,7 +69,7 @@ void evolve(double *prim, double R1, double R2, int n, int stop)
 
         FILE *f = fopen("out.txt", "a");
         fprintf(f, "%.12g", r);
-        for(i=0; i<nc; i++)
+        for(i=0; i<nq; i++)
             fprintf(f, " %.12g", prim[i]);
         fprintf(f, "\n");
         fclose(f);
@@ -99,6 +101,7 @@ void substep_forward(double *prim1, double *prim2, double r, double dr)
         prim2[i] = prim1[i] + dr*dprim[i];
     for(i=nc; i<nq; i++)
         prim2[i] = prim1[i];
+    exact(prim2, r+dr);
 
     free(dprim);
 }
@@ -151,6 +154,7 @@ void substep_backward(double *prim1, double *prim2, double r, double dr)
 
     for(i=0; i<nq; i++)
         prim2[i] = new[i];
+    exact(prim2, r+dr);
 
     printf("   Used %d iterations.\n", j);
 
@@ -197,6 +201,7 @@ void backward_euler(double *prim, double r, double *dr)
 
     for(i=0; i<nq; i++)
         prim[i] = prim2[i];
+    exact(prim, r + *dr);
     free(prim2);
 }
 
@@ -217,6 +222,7 @@ void forward_rk2(double *prim, double r, double *dr)
 
     for(i=0; i<nc; i++)
         prim[i] = prim2[i] - prim1[i] + prim[i];
+    exact(prim, r + *dr);
 
     free(prim1);
     free(prim2);
@@ -252,6 +258,8 @@ void forward_rk4(double *prim, double r, double *dr)
 
     for(i=0; i<nc; i++)
         prim[i] = (prim1[i]+2*prim2[i]+prim3[i]+prim4[i]-2*prim[i])/3.0;
+
+    exact(prim, r + *dr);
 
     free(prim1);
     free(prim2);

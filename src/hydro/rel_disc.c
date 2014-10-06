@@ -26,6 +26,8 @@ void initial_rel_disc(double *prim, double *R1, double *R2)
     prim[DUP] = -0.0015;
 }
 
+void exact_rel_disc(double *prim, double r){}
+
 void flow_grad_rel_disc(double *prim, double r, double *dprim)
 {
 

@@ -21,6 +21,8 @@ void initial_test(double *prim, double *R1, double *R2)
     prim[2] = -1.0;
 }
 
+void exact_test(double *prim, double x){}
+
 void flow_grad_test(double *prim, double x, double *dprim)
 {
     dprim[0] = prim[1];

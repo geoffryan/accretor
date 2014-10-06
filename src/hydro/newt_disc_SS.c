@@ -19,14 +19,20 @@ void initial_newt_disc_SS(double *prim, double *R1, double *R2)
 {
     double r1 = 3.0;
     double r2 = 1.0;
-    double Mdot = 1.0e-6;
+    double Mdot = 1.05e-1;
     double risco = 1.0e-6;
     double rho, T, vr, vp;
 
+    double omK = sqrt(M/(r1*r1*r1));
     rho = 1.0;
-    T = sqrt(M/(r1*r1*r1)) * Mdot/(3*M_PI*alpha*rho);
     vr = -Mdot/(2*M_PI*r1*rho);
-    vp = sqrt(M/(r1*r1*r1));
+    vp = sqrt(omK*omK + vr*omK/(r1*alpha) - vr*vr);
+    T = -2.0*r1*vr*omK / (3.0*alpha);
+
+    vr = 2.0 * -1.125*alpha / (3.625) * r1*omK;
+    vp = sqrt((3.625*3.625 - 2* 3.625*1.125 - 2* 1.125*1.125*alpha*alpha) / (3.625*3.625)) * omK;
+    T = 2 * 0.75 / (3.625) * r1*r1*omK*omK;
+    Mdot = -2*M_PI*r1*vr*rho;
 
     *R1 = r1;
     *R2 = r2;
@@ -37,7 +43,12 @@ void initial_newt_disc_SS(double *prim, double *R1, double *R2)
     prim[UPP] = vp;
     prim[ACC] = Mdot;
     //prim[LLL] = risco*risco*Mdot/(2*M_PI)*sqrt(M/(risco*risco*risco));
-    prim[LLL] = r1*r1*r1*(vr*vp + 1.5*alpha*rho*T*sqrt(r1*r1*r1/M)*vp/r1);
+    prim[LLL] = 0.0;
+}
+
+void exact_newt_disc_SS(double *prim, double r)
+{
+    prim[RHO] = -prim[ACC] / (2*M_PI*r*prim[URR]);
 }
 
 void flow_grad_newt_disc_SS(double *prim, double r, double *dprim)
@@ -48,14 +59,12 @@ void flow_grad_newt_disc_SS(double *prim, double r, double *dprim)
     double dPPPdRHO, dPPPdTTT, dEPSdRHO, dEPSdTTT;
     double D;
 
+    rho = prim[RHO];
     v = prim[URR];
     om = prim[UPP];
     T = prim[TTT];
     Mdot = prim[ACC];
     L = prim[LLL];
-
-    rho = -Mdot / (2*M_PI*r*v);
-    prim[RHO] = rho;
 
     P = pressure(prim, r);
     eps = spec_int_en(prim, r);
@@ -73,6 +82,7 @@ void flow_grad_newt_disc_SS(double *prim, double r, double *dprim)
 
     //om derivative
     dom = (r*r*r*rho*v*om - L) / (r*r*r*rho*nu);
+    printf("   d_om = %.12lg (%.12lg)\n", dom, -1.5*om/r);
 
     // v derivative
     dv = dPPPdRHO/r + r*om*om - M/(r*r) - (dEPSdRHO/r - P/(r*rho*rho) 

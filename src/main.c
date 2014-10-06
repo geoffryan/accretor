@@ -10,11 +10,11 @@ int main(int argc, char *argv[])
     double R1, R2;
     double *prim;
 
-    N = 1000;
+    N = 2000;
     stop = -1;
 
     printf("Setting up...\n");
-    hydro_setup(3);
+    hydro_setup(2);
     step_setup(3);
     eos_setup(0);
     cool_setup(0);
