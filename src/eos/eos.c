@@ -1,8 +1,9 @@
+#include "../par.h"
 #include "eos.h"
 
-void eos_setup(int choice)
+void eos_setup(struct parList *theParList)
 {
-    if(choice == 0)
+    if(theParList->eos == 0)
     {
         pressure = &pressure_ideal;
         spec_int_en = &spec_int_en_ideal;
@@ -13,17 +14,17 @@ void eos_setup(int choice)
     }
 }
 
-void cool_setup(int choice)
+void cool_setup(struct parList *theParList)
 {
-    if(choice == 0)
+    if(theParList->cool == 0)
     {
         cool = &cool_none;
     }
-    else if(choice == 1)
+    else if(theParList->cool == 1)
     {
         cool = &cool_thompson;
     }
-    else if(choice == 2)
+    else if(theParList->cool == 2)
     {
         cool = &cool_visc;
     }

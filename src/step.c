@@ -1,8 +1,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#include "step.h"
+#include "par.h"
 #include "hydro/hydro.h"
+#include "step.h"
 
 /*
 This file includes all of the integration algorithms for solving
@@ -15,38 +16,41 @@ size.  Adaptive integrators may alter the value of dr.  In calling
 'step', the values in 'prim' will be updated to the values at r+dr.
 */
 
-void step_setup(int choice)
+void step_setup(struct parList *theParList)
 {
     /*
     Intializes the 'step' function pointer to refer to the desired
     integration scheme.
     */
 
-    if(choice == 0)
+    if(theParList->step == 0)
     {
         step = &forward_euler;
     }
-    else if(choice == 1)
+    else if(theParList->step == 1)
     {
         step = &forward_rk2;
     }
-    else if(choice == 2)
+    else if(theParList->step == 2)
     {
         step = &forward_rk4;
     }
-    else if(choice == 3)
+    else if(theParList->step == 3)
     {
         step = &backward_euler;
     }
 }
 
-void evolve(double *prim, double R1, double R2, int n, int stop)
+void evolve(double *prim, double R1, double R2, struct parList *theParList)
 {
     /*
     Integrates prim from R1 to R2 in n (approximately) steps.
     */
 
     int i, iter, nc, nq;
+    int stop = theParList->stop;
+    int n = theParList->N;
+    
     double r = R1;
     double dr = (R2-R1)/n;
     double fac = exp(log(R2/R1)/n) - 1.0;
@@ -114,7 +118,7 @@ void substep_backward(double *prim1, double *prim2, double r, double dr)
     */
 
     int max_count = 1000000;
-    double tolerance = 1.0e-6;
+    double tolerance = 1.0e-10;
     int nc = numc();
     int nq = numq();
     int i, j;

@@ -3,3 +3,4 @@ bin/accretor
 *.o
 notebooks/
 out*
+*.swp

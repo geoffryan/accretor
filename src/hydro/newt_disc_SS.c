@@ -23,15 +23,12 @@ void initial_newt_disc_SS(double *prim, double *R1, double *R2)
     double risco = 1.0e-6;
     double rho, T, vr, vp;
 
+    double fac = (1.0+(1.0/(GAMMA-1.0)-0.5)/(1.125*visc_f))/alpha;
     double omK = sqrt(M/(r1*r1*r1));
     rho = 1.0;
-    vr = -Mdot/(2*M_PI*r1*rho);
+    vr = -2*fac*(sqrt(1.0+2.0/(fac*fac))-1.0) * r1*omK;
     vp = sqrt(omK*omK + vr*omK/(r1*alpha) - vr*vr);
     T = -2.0*r1*vr*omK / (3.0*alpha);
-
-    vr = 2.0 * -1.125*alpha / (3.625) * r1*omK;
-    vp = sqrt((3.625*3.625 - 2* 3.625*1.125 - 2* 1.125*1.125*alpha*alpha) / (3.625*3.625)) * omK;
-    T = 2 * 0.75 / (3.625) * r1*r1*omK*omK;
     Mdot = -2*M_PI*r1*vr*rho;
 
     *R1 = r1;

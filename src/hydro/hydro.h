@@ -14,13 +14,15 @@
 static double M = 1.0;
 static double alpha = 0.01;
 
+struct parList;
+
 int (*numq)();
 int (*numc)();
 void (*initial)(double *, double *, double *);
 void (*exact)(double *, double);
 void (*flow_grad)(double *, double, double *);
 
-void hydro_setup(int choice);
+void hydro_setup(struct parList *theParList);
 
 int numq_test();
 int numc_test();

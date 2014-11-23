@@ -1,0 +1,8 @@
+#Parameter File for ACCRETOR
+
+Hydro   0    //0 test, 1 Schwarzschild Disc, 2 Newtonian Disc, 3 Bondi
+EOS     0    //0 Ideal Gamma-law gas.
+Cool    0    //0 No Cooling, 1 Thompson, 2 Viscous
+Step    3    //0 Forward-Euler, 1 RK2, 2 RK4, 3 Backward-Euler
+N       100  //Approximate number of steps
+Stop    -1   //Maximum number of steps

@@ -2,8 +2,6 @@
 #include "eos.h"
 #include "../hydro/hydro.h"
 
-double GAM = 4.0/3.0;
-
 double pressure_ideal(double *prim, double r)
 {
     return prim[RHO]*prim[TTT];
@@ -11,7 +9,7 @@ double pressure_ideal(double *prim, double r)
 
 double spec_int_en_ideal(double *prim, double r)
 {
-    return prim[TTT]/(GAM-1.0);
+    return prim[TTT]/(GAMMA-1.0);
 }
 
 double depsdrho_ideal(double *prim, double r)
@@ -21,7 +19,7 @@ double depsdrho_ideal(double *prim, double r)
 
 double depsdT_ideal(double *prim, double r)
 {
-    return 1.0/(GAM-1.0);
+    return 1.0/(GAMMA-1.0);
 }
 
 double dPdrho_ideal(double *prim, double r)
